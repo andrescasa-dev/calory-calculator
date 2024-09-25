@@ -35,6 +35,7 @@ function UnitInputField({
           id={inputId}
           type="number"
           {...register(name, {
+            valueAsNumber: true,
             required: { message: `${name} is required`, value: required },
             min: {
               message: `${name} must be at least ${min} ${unit}`,

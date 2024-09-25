@@ -1,27 +1,16 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import UnitInputField from "./components/UnitInputField";
 import UnitSystemSelector from "./components/UnitSystemSelector";
 import { unitSystem, UserData } from "./types";
-
-// Could be great: add some validation that attach this table to the unitSystem type, for proper type safety.
-const unitTable = {
-  imperial: {
-    label: "Imperial",
-    weight: "lb",
-    height: "in",
-  },
-  metric: {
-    label: "Metric",
-    weight: "kg",
-    height: "cm",
-  },
-};
+import { getDailyCalories, transformToImperial, unitTable } from "./utils";
 
 function App() {
   const [unitSystem, setUnitSystem] = useState<unitSystem>("imperial");
+  const [dailyCalories, setDailyCalories] = useState<number | null>(null);
   const {
     register,
+    watch,
     formState: { errors },
     handleSubmit,
   } = useForm<UserData>();
@@ -29,6 +18,34 @@ function App() {
   const onSubmit = (data: UserData) => {
     console.log("Form data", data);
   };
+
+  useEffect(() => {
+    const { unsubscribe } = watch((inputValues) => {
+      if (
+        [Object.values(inputValues)].some(
+          (value) => Number.isNaN(value) || value === undefined,
+        )
+      )
+        return; // do nothing if there are empty inputs assuming all inputs are of type number
+
+      const nonEmptyInputValues: UserData = {
+        age: inputValues.age!, // TS doesn't run js so it doesn't consider the previous type validation, that's why i use the "!" TS mark
+        height: inputValues.height!,
+        weight: inputValues.weight!,
+      };
+
+      const {
+        weight: validWeight,
+        height: validHeight,
+        age: validAge,
+      } = unitSystem === "metric"
+        ? transformToImperial(nonEmptyInputValues)
+        : nonEmptyInputValues;
+
+      setDailyCalories(getDailyCalories(validWeight, validHeight, validAge));
+    });
+    return () => unsubscribe();
+  }, [watch]);
 
   return (
     <main className="flex flex-col gap-6 justify-center items-center min-h-svh">
@@ -85,7 +102,11 @@ function App() {
       </form>
       <section>
         <h2 className="text-2xl font-bold capitalize">Your Daily Calories</h2>
-        <p>Please fill the form to get your calories</p>
+        {dailyCalories !== null ? (
+          dailyCalories
+        ) : (
+          <p>Please fill the form to get your calories</p>
+        )}
       </section>
     </main>
   );
