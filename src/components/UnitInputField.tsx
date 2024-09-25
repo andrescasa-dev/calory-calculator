@@ -31,6 +31,7 @@ function UnitInputField({
       <label htmlFor={inputId}>{label}</label>
       <div className="flex gap-2">
         <input
+          placeholder={String(min)}
           className="flex-grow"
           id={inputId}
           type="number"
