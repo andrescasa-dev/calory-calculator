@@ -13,14 +13,9 @@ function App() {
     register,
     trigger,
     watch,
-
-    formState: { errors, isValid },
-    handleSubmit,
+    formState: { errors, isValid, isValidating },
   } = useForm<UserData>({ mode: "onChange" });
-
-  const onSubmit = (data: UserData) => {
-    console.log("Form data", data);
-  };
+  const inputValues = watch();
 
   useEffect(() => {
     if (isFirstRender.current) {
@@ -32,60 +27,47 @@ function App() {
   }, [unitSystem, trigger]);
 
   useEffect(() => {
-    const { unsubscribe } = watch((inputValues) => {
-      if (
-        Object.values(inputValues).some(
-          (value) => Number.isNaN(value) || value === undefined,
-        )
-      ) {
-        return; // do nothing if there are empty inputs assuming all inputs are of type number
-      }
+    if (isValidating) return;
+    if (!isValid) {
+      setDailyCalories(null);
+      return;
+    }
+    if (
+      Object.values(inputValues).some(
+        (value) => Number.isNaN(value) || value === undefined,
+      )
+    ) {
+      return; // do nothing if there are empty inputs assuming all inputs are of type number
+    }
 
-      if (Object.keys(errors).length !== 0) {
-        console.log("erros", { ...errors });
-        setDailyCalories(null);
-        return; // do nothing if there are some input erros
-      }
+    const nonEmptyInputValues: UserData = {
+      age: inputValues.age!, // TS doesn't run js so it doesn't consider the previous type validation, that's why i use the "!" TS mark
+      height: inputValues.height!,
+      weight: inputValues.weight!,
+    };
 
-      const nonEmptyInputValues: UserData = {
-        age: inputValues.age!, // TS doesn't run js so it doesn't consider the previous type validation, that's why i use the "!" TS mark
-        height: inputValues.height!,
-        weight: inputValues.weight!,
-      };
+    const {
+      weight: validWeight,
+      height: validHeight,
+      age: validAge,
+    } = unitSystem === "metric"
+      ? transformToImperial(nonEmptyInputValues)
+      : nonEmptyInputValues;
 
-      const {
-        weight: validWeight,
-        height: validHeight,
-        age: validAge,
-      } = unitSystem === "metric"
-        ? transformToImperial(nonEmptyInputValues)
-        : nonEmptyInputValues;
-
-      console.log("setting calories");
-      setDailyCalories(getDailyCalories(validWeight, validHeight, validAge));
-    });
-    return () => unsubscribe();
-  }, [watch, unitSystem, errors]);
-
-  useEffect(() => {
-    console.log("is valid", isValid);
-  }, [isValid]);
+    setDailyCalories(getDailyCalories(validWeight, validHeight, validAge));
+  }, [isValid, unitSystem, inputValues, isValidating]);
 
   return (
-    <main className="flex flex-col gap-6 justify-center items-center min-h-svh">
-      <h2 className="text-2xl font-bold capitalize">Your personal data</h2>
-      <form
-        onSubmit={handleSubmit(onSubmit)}
-        className="grid gap-4 px-6 py-4 bg-gray-50 border border-gray-200 rounded-md"
-      >
+    <main className="grid auto-rows-min gap-6 justify-center items-center min-h-svh p-12">
+      <h1 className="text-3xl font-bold capitalize">Calories Calculator</h1>
+      <form className="grid gap-4 p-6 bg-gray-50 border border-gray-200 rounded-md">
+        <h2 className="text-2xl font-bold capitalize">Your personal data</h2>
         <UnitSystemSelector
-          options={Object.entries(unitTable).map(([key, value]) => {
-            return (
-              <option key={value.label} value={key}>
-                {value.label}
-              </option>
-            );
-          })}
+          options={Object.entries(unitTable).map(([key, value]) => (
+            <option key={value.label} value={key}>
+              {value.label}
+            </option>
+          ))}
           onChange={(e) => {
             setUnitSystem(e.target.value as unitSystem);
           }}
@@ -124,11 +106,17 @@ function App() {
         />
       </form>
       <section>
-        <h2 className="text-2xl font-bold capitalize">Your Daily Calories</h2>
         {dailyCalories !== null ? (
-          dailyCalories
+          <div>
+            <h2 className="text-2xl font-bold capitalize">
+              Your Daily Calories:
+            </h2>
+            <span>{dailyCalories} kcal</span>
+          </div>
         ) : (
-          <p>Please fill the form to get your calories</p>
+          <p className="text-center">
+            Please fill the form to get your calories
+          </p>
         )}
       </section>
     </main>

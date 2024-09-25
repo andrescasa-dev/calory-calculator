@@ -32,7 +32,7 @@ function UnitInputField({
       <div className="flex gap-2">
         <input
           placeholder={String(min)}
-          className="flex-grow"
+          className="flex-grow rounded-sm border border-gray-200 px-1"
           id={inputId}
           type="number"
           {...register(name, {

@@ -27,6 +27,7 @@ export const getDailyCalories = (
   height: number,
   age: number,
 ) => {
+  console.log(weight, height, age);
   const factor = getFactor(weight);
   return (10 * weight + 6.25 * height - 10 * age + 5) * factor;
 };
