@@ -1,7 +1,7 @@
+import { OctagonX } from "lucide-react";
 import { useId } from "react";
 import { FieldError, UseFormRegister } from "react-hook-form";
 import { FormNames, UserData } from "../types";
-import { Info } from "lucide-react";
 
 interface UnitInputFieldProps {
   label: string;
@@ -32,7 +32,7 @@ function UnitInputField({
       <div className="flex gap-2">
         <input
           placeholder={String(min)}
-          className="flex-grow rounded-sm border border-gray-200 px-1"
+          className="flex-grow rounded-sm border border-gray-300 px-1"
           id={inputId}
           type="number"
           {...register(name, {
@@ -51,8 +51,8 @@ function UnitInputField({
         <span>{unit}</span>
       </div>
       {error && (
-        <p className="text-red-400" aria-live="polite">
-          <Info className="size-4 inline-block" /> {`${error.message}`}
+        <p className="text-red-500" aria-live="polite">
+          <OctagonX className="size-4 inline-block" /> {`${error.message}`}
         </p>
       )}
     </div>

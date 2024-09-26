@@ -4,6 +4,7 @@ import UnitInputField from "./components/UnitInputField";
 import UnitSystemSelector from "./components/UnitSystemSelector";
 import { unitSystem, UserData } from "./types";
 import { getDailyCalories, transformToImperial, unitTable } from "./utils";
+import { Info } from "lucide-react";
 
 function App() {
   const [unitSystem, setUnitSystem] = useState<unitSystem>("imperial");
@@ -60,7 +61,7 @@ function App() {
   return (
     <main className="grid auto-rows-min gap-6 justify-center items-center min-h-svh p-12">
       <h1 className="text-3xl font-bold capitalize">Calories Calculator</h1>
-      <form className="grid gap-4 p-6 bg-gray-50 border border-gray-200 rounded-md">
+      <form className="grid gap-4 p-6 bg-gray-50 border border-gray-300 rounded-md">
         <h2 className="text-2xl font-bold capitalize">Your personal data</h2>
         <UnitSystemSelector
           options={Object.entries(unitTable).map(([key, value]) => (
@@ -105,17 +106,18 @@ function App() {
           error={errors.height}
         />
       </form>
-      <section>
+      <section aria-live="polite">
         {dailyCalories !== null ? (
           <div>
             <h2 className="text-2xl font-bold capitalize">
-              Your Daily Calories:
+              Your Daily Calories Are:
             </h2>
             <span>{dailyCalories} kcal</span>
           </div>
         ) : (
-          <p className="text-center">
-            Please fill the form to get your calories
+          <p className="text-center flex items-center gap-2 text-blue-600 bg-blue-50 border border-blue-200 rounded-md py-2 px-4">
+            <Info className="size-4" /> Please fill the form to get your
+            calories
           </p>
         )}
       </section>

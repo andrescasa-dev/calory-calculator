@@ -29,7 +29,7 @@ export const getDailyCalories = (
 ) => {
   console.log(weight, height, age);
   const factor = getFactor(weight);
-  return (10 * weight + 6.25 * height - 10 * age + 5) * factor;
+  return Math.round((10 * weight + 6.25 * height - 10 * age + 5) * factor);
 };
 
 export const transformToImperial = (inputValues: UserData): UserData => {
